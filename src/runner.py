@@ -1,4 +1,3 @@
-import pandas as pd
 from pathlib import Path
 from joblib import dump, load
 
@@ -10,10 +9,11 @@ from absl import flags
 from ml_collections.config_flags import config_flags
 from ml_collections.config_dict import placeholder
 
-from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split
 
+from data import load_train_test_splits
+from model_dispatcher import load_model
+from utils import set_seed
 
 # Configure experiment runner
 FLAGS = flags.FLAGS
@@ -27,45 +27,20 @@ config_wandb.job_type = placeholder(str)
 config_wandb.notes = placeholder(str)
 config_flags.DEFINE_config_dict("wandb", config_wandb)
 
-# Configure data
-config_data = ml_collections.ConfigDict()
-config_data.path = "../data/0_raw/concrete.csv"
-config_data.frac = 1.0
-config_data.test_size = 0.2
-config_flags.DEFINE_config_dict("data", config_data)
-
-# Configure model
-config_model = ml_collections.ConfigDict()
-config_model.learner = "ridge"
-config_model.alpha = 1.0
-config_flags.DEFINE_config_dict("model", config_model)
-
-
-def load_data(path, frac=1.0):
-    X = pd.read_csv(path)
-    X = X.sample(frac=frac).reset_index(drop=True)
-    y = X.pop("CompressiveStrength")
-    return X, y
-
 
 def main(_):
     if FLAGS.log:
         wandb.init(config=FLAGS, **FLAGS.wandb)
 
     # Pipeline
-    ## Seed everything
+    ## Set seed for reproducibility
+    set_seed()
 
     ## Prepare data
-    X, y = load_data(
-        path=FLAGS.data.path,
-        frac=FLAGS.data.frac,
-    )
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=FLAGS.data.test_size, 
-    )
+    X_train, X_test, y_train, y_test = load_train_test_splits()
 
     ## Train model
-    model = Ridge(alpha=FLAGS.model.alpha)
+    model = load_model()
     model.fit(X_train, y_train)
 
     ## Evaluate
