@@ -1,0 +1,46 @@
+program: runner.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "--log"
+  - "--model=xgboost_cfg.py"
+  - ${args}
+method: bayes
+metric:
+  goal: minimize
+  name: test_rmse
+parameters:
+  model.hparams.booster:
+    values: ["gbtree", "dart"]
+  model.hparams.n_estimators:
+    distribution: int_uniform
+    min: 100
+    max: 1000
+  model.hparams.learning_rate:
+    distribution: log_uniform
+    min: -4
+    max: 2
+  model.hparams.max_depth:
+    distribution: int_uniform
+    min: 2
+    max: 8
+  model.hparams.subsample:
+    distribution: uniform
+    min: 0.5
+    max: 1.0
+  model.hparams.colsample_bytree:
+    distribution: uniform
+    min: 0.5
+    max: 1.0
+  model.hparams.reg_alpha:
+    distribution: log_uniform
+    min: -4
+    max: 3
+  model.hparams.reg_lambda:
+    distribution: log_uniform
+    min: -4
+    max: 3
+early_terminate:
+  type: hyperband
+  min_iter: 3

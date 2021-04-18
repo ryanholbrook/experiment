@@ -22,10 +22,12 @@ flags.DEFINE_bool('log', False, "Log this experiment to wandb.")
 
 # Configure experiment tracking
 config_wandb = ml_collections.ConfigDict()
-config_wandb.project = "my-project"
+config_wandb.project = "hparam-src"
 config_wandb.job_type = placeholder(str)
 config_wandb.notes = placeholder(str)
-config_flags.DEFINE_config_dict("wandb", config_wandb)
+config_flags.DEFINE_config_dict(
+    'wandb', config_wandb, "Configuration for W&B experiment tracking.",
+)
 
 
 def main(_):
@@ -33,10 +35,10 @@ def main(_):
         wandb.init(config=FLAGS, **FLAGS.wandb)
 
     # Pipeline
-    ## Set seed for reproducibility
+    ## Setup
     set_seed()
 
-    ## Prepare data
+    ## Data
     X_train, X_test, y_train, y_test = load_train_test_splits()
 
     ## Train model
@@ -52,8 +54,8 @@ def main(_):
     # Log
     if FLAGS.log:
         # Log model
-        model_artifact = wandb.Artifact('ridge-model', type='model')
-        model_path = Path('../artifacts/models/ridge.joblib')
+        model_artifact = wandb.Artifact('model', type='model')
+        model_path = Path('../artifacts/models/model.joblib')
         dump(model, model_path, compress=3)
         model_artifact.add_file(model_path)
         wandb.log_artifact(model_artifact)
