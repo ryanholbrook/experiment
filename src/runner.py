@@ -12,6 +12,7 @@ from ml_collections.config_dict import placeholder
 from sklearn.metrics import mean_squared_error
 
 from data import load_train_test_splits
+from definitions import ARTIFACT_DIR
 from model_dispatcher import load_model
 from utils import set_seed
 
@@ -55,7 +56,7 @@ def main(_):
     if FLAGS.log:
         # Log model
         model_artifact = wandb.Artifact('model', type='model')
-        model_path = Path('../artifacts/models/model.joblib')
+        model_path = ARTIFACT_DIR / "models" / "model.joblib"
         dump(model, model_path, compress=3)
         model_artifact.add_file(model_path)
         wandb.log_artifact(model_artifact)
