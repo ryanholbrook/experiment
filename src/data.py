@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 import ml_collections
@@ -6,11 +8,13 @@ from ml_collections.config_flags import config_flags
 from ml_collections.config_dict import placeholder
 
 from sklearn.model_selection import train_test_split
+from definitions import DATA_DIR
+
 
 # Configure data
 FLAGS = flags.FLAGS
 config_data = ml_collections.ConfigDict()
-config_data.path = "../data/0_raw/concrete.csv"
+config_data.path = DATA_DIR / "0_raw" / "concrete.csv"
 config_data.frac = 1.0
 config_data.test_size = 0.2
 config_flags.DEFINE_config_dict("data", config_data)
